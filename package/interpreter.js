@@ -1,7 +1,7 @@
 
 const { runShell, executeNodeCodeEval } = require('./code-runner');
 const LangChainLLM = require('./llm');
-const { parseResultToList } = require('./parser');
+const { parseResultToList, removeCodeObstacles } = require('./parser');
 const { promptTemplate, errorPromptTemplate } = require('./prompt-templates');
 
 class Interpreter {
@@ -13,8 +13,8 @@ class Interpreter {
     }
 
     handleError(error) {
-
-        const message = error.message || error;
+        let message = error.stack ? error.stack : error;
+        message = message.slice(0, 250);
 
         if (this.options?.debug) {
             console.log("======= Error =======");
@@ -35,6 +35,8 @@ class Interpreter {
         try {
             const prompt = isInitial ? promptTemplate.replace("{GOAL}", input) : input;
             const res = await this.llm.execute(prompt);
+            const fs = require('fs');
+            fs.writeFileSync('llm-response.json', JSON.stringify(res, null, 2));
             const parsed = await this.parseResult(res.response);
             await this.proceedResult(parsed);
         } catch (e) {
@@ -52,6 +54,9 @@ class Interpreter {
             let lastValue = {};
             for (let parsedItem of parsed) {
 
+                if (parsedItem.txt == undefined || parsedItem.txt == "") {
+                    throw new Error("ERROR : Step code was to long or not valid");
+                }
 
                 this.llm.addHuman("Im executing now : " + parsedItem.txt);
 
@@ -81,7 +86,7 @@ class Interpreter {
                         console.log(parsedItem.txt);
                     }
 
-                    lastValue = await executeNodeCodeEval(parsedItem.txt, lastValue ?? {});
+                    lastValue = await executeNodeCodeEval(removeCodeObstacles(parsedItem.txt), lastValue ?? {});
                 }
 
                 if (parsedItem.txt.includes('DONE')) {

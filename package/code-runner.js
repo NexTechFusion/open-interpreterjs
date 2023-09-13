@@ -3,7 +3,7 @@ const { spawn } = require('child_process');
 let globalState = {};
 
 
-async function executeNodeCodeEval(code, {}) {
+async function executeNodeCodeEval(code, { }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -33,14 +33,21 @@ async function executeNodeCodeEval(code, {}) {
 
 const runShell = (command, timeout = 300000) => {
     return new Promise((resolve, reject) => {
-        const child = spawn(removeComments(command), { shell: true, stdio: 'inherit' });
+        const child = spawn(removeComments(command), { shell: true, stdio: ['inherit'] });
+
+        let stderrData = '';
+
+        child.stderr.on('data', (data) => {
+            stderrData += data.toString();
+        });
 
         child.on('exit', async (code, signal) => {
             if (code === 0) {
                 await new Promise((resolve) => setTimeout(resolve, 2000));
                 resolve();
             } else {
-                reject(`Command exited with code ${code} and signal ${signal}`);
+                await new Promise((resolve) => setTimeout(resolve, 2000));
+                reject(`ERROR : ${stderrData}`);
             }
         });
 

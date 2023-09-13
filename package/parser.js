@@ -47,7 +47,13 @@ function parseResultToList(inputString) {
     return result;
 }
 
+function removeCodeObstacles(code) {
+    // remove DONE text from code
+    code = code.replace(/DONE/g, '');
+}
+
 
 module.exports = {
-    parseResultToList
+    parseResultToList,
+    removeCodeObstacles
 };

@@ -1,38 +1,43 @@
 const preInstalledPackages = "pupeteer, cheerio, axios, fs";
 
+const fewShotTemplate = `
+const axios = require('axios');
+const cheerio = require('cheerio');
+const websiteUrl = 'https://www.mmmake.com';
+
+async function fetchEmails() {
+  try {
+    const response = await axios.get(websiteUrl);
+    if (response.status === 200) {
+      const html = response.data;
+      const $ = cheerio.load(html);
+      const emailPattern = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b/g;
+      const emails = html.match(emailPattern);
+
+     return emails;
+  } catch (error) {
+    throw new Error(e);
+  }
+}
+
+const emails = await fetchEmails();
+state = { emails };
+`;
+
+
+
+
+
 const promptTemplate = `
-You are an AI Open Interpreter, a world-class nodejs and shell script programmer that can complete any goal by executing code.
-You have access to the internet and are capable to browse.
-You have access to the file system and are capable to read and write files.
-You know the nodeJs libraries ${preInstalledPackages} very well and they are already installed.
+Act as an expert in nodejs and write me code snippets to make this possible : {GOAL}.
 
-Your goal is : {GOAL}
+Your NodeJs code must be promise based with **await ...**, NEVER use then() because i will exectute it in an async function.
+Take a break if you write to much code we will continue later.
+Reponse code as mardown format.
 
-I will exectue each nodejs code isolated with an  **await eval("...")**, so make sure your code is executable without editing.
-Values that you want to share between each nodejs code, save them to the variable **state={...}**
-<IMPORTANT!> Code steps are NOT connected you cant use a variable of step 1 in 2 and so on, for sharing use the variable **state={...}** </IMPORTANT!>.
-NodeJs code must be promise based with **await ...**, NEVER use then(). 
+Write **DONE** in your last line to indicate that you are done.
 
-Write as much as possbile code into one step!
-
-Structure it like that:
-1.  description of step 1
-\`\`\`nodejs or shell 
-..code
-\`\`\`
-
-2.  description of step 2
-\`\`\`nodejs or shell 
-   ...code
-  \`\`\`
-... and so on
-
-When you are finished with your goal, write **DONE** as last step.
-
-Firstly you need to install all neccassary nodejs packages that you use in your code by using shell **npm i ...**, expect **${preInstalledPackages}**.
-If you want to send data between different programming languages, save the data to a txt or json. 
-
-Make 3 steps now, we will add more steps later if neccaesary.
+Response me now please : 
 `;
 
 const errorPromptTemplate = `
@@ -42,6 +47,5 @@ const errorPromptTemplate = `
  New Steps :
 
 `;
-
 
 module.exports = { promptTemplate, errorPromptTemplate }

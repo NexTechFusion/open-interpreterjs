@@ -29,13 +29,16 @@ state = { emails };
 
 
 const promptTemplate = `
-Act as an expert in nodejs and write me code snippets to make this possible : {GOAL}.
+Act as an expert in nodejs and shell scripts and write me code snippets to make this possible : {GOAL}.
 
 Your NodeJs code must be promise based with **await ...**, NEVER use then() because i will exectute it in an async function.
-Take a break if you write to much code we will continue later.
-Reponse code as mardown format.
+Reponse code as mardown format with 
+\`\`\`nodejs or shell
+... your code
+\`\`\`
 
 Write **DONE** in your last line to indicate that you are done.
+Take a break if you write to much code we will continue later.
 
 Response me now please : 
 `;

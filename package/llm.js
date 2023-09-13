@@ -10,6 +10,7 @@ class LangChainLLM {
         this.model = new OpenAI({
             modelName: options.modelName,
             openAIApiKey: options.apiKey,
+            maxTokens: -1
         });
         this.memory = new BufferMemory();
         this.chain = new ConversationChain({ llm: this.model, memory: this.memory });

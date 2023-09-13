@@ -102,7 +102,7 @@ class Interpreter {
 
 
             if (!isDone) {
-                this.execute("Proceed on doing the next steps");
+                this.execute("Continue");
             }
 
         }
